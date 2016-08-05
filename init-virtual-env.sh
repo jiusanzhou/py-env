@@ -219,7 +219,8 @@ function mustHasV()
         echo -e "${blue}Has tool ${virtual} ${off_color}"
     else
         echo -e "${blue_yellow}No virtualenv module, will download it ...${off_color}"
-        wget https://pypi.python.org/packages/5c/79/5dae7494b9f5ed061cff9a8ab8d6e1f02db352f3facf907d9eb614fb80e9/virtualenv-15.0.2.tar.gz#md5=0ed59863994daf1292827ffdbba80a63
+        wget
+        https://pypi.python.org/packages/5c/79/5dae7494b9f5ed061cff9a8ab8d6e1f02db352f3facf907d9eb614fb80e9/virtualenv-15.0.2.tar.gz#md5=0ed59863994daf1292827ffdbba80a63 --no-check-certificate
         tar -zxf "virtualenv-15.0.2.tar.gz"
         cd "virtualenv-15.0.2"
 
