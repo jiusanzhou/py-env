@@ -230,7 +230,7 @@ function mustHasV()
         cd ../
         rm -rf virtualenv-15.0.2 virtualenv-15.0.2.tar.gz
 
-        if [ -d ${env} ]
+        if [ -f ${virtual} ]
         then
             echo -e "${blue}Success install ${virtual} ${off_color}"
         else
