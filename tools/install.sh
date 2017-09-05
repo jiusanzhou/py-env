@@ -98,7 +98,7 @@ install() {
   echo ''
   echo '   If you are on debain/ubuntu use "sudo apt-get install"   '
   echo ''
-  echo '   sudo apt-get install libssl-dev libsqlite3-dev           '
+  echo '   sudo apt-get install zlibg1-dev libssl-dev libsqlite3-dev libncurses5-dev libbz2-dev libreadline-dev libdb4.8-dev libexpat1-dev libxml2-dev libxslt1-dev libmysqlclient-dev tcl8.5-dev,tk8.5-dev           '
   echo ''
   echo ''
   printf "${NORMAL}"

@@ -46,8 +46,8 @@ function install()
 function installReadline()
 {
     exit 0
-    #ftp://ftp.cwru.edu/pub/bash/readline-6.3.tar.gz
-    #ftp://ftp.gnu.org/gnu/readline/readline-6.3.tar.gz
+    # ftp://ftp.cwru.edu/pub/bash/readline-6.3.tar.gz
+    # ftp://ftp.gnu.org/gnu/readline/readline-6.3.tar.gz
 }
 
 function installSqlite()

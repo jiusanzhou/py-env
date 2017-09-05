@@ -9,7 +9,7 @@
 First, you should install some C dependencies, on Debain system listed below,
 
 ```bash
-sudo apt-get install zlibg1-dev libssl-dev libsqlite3-dev ...
+sudo apt-get install zlibg1-dev libssl-dev libsqlite3-dev libncurses5-dev libbz2-dev libreadline-dev libdb4.8-dev libexpat1-dev libxml2-dev libxslt1-dev libmysqlclient-dev tcl8.5-dev,tk8.5-dev
 ```
 
 1. Download the `init-virtual-env.sh`
