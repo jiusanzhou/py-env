@@ -6,6 +6,12 @@
 
 ### Usage
 
+First, you should install some C dependencies, on Debain system listed below,
+
+```bash
+sudo apt-get install zlibg1-dev libssl-dev libsqlite3-dev ...
+```
+
 1. Download the `init-virtual-env.sh`
 
 2. `chmod +x init-virtual-env.sh`
