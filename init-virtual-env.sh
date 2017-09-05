@@ -10,13 +10,29 @@ then
     white_gray="\033[1;30;47m"
 fi
 
-C_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# C_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd ${C_DIR}
+# cd ${C_DIR}
+NOW_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WORK_DIR="$HOME/PYENVPROJECTS"
+FILE_NAME="init-virtual-env.sh"
+
+if [ "${NOW_DIR}" != "${WORK_DIR}" ]; then
+    if [ ! -d "${WORK_DIR}" ]; then
+        mkdir "${WORK_DIR}"
+    fi
+    
+    cp "${FILE_NAME}" "${WORK_DIR}"
+    cd "${WORK_DIR}"
+    /bin/bash ${FILE_NAME} "$1" "$2"
+    exit 0
+fi
 
 # depandence
 
 dependences=$HOME/.virtual-python/dependences
+
+cache=$HOME/.virtual-python/cache
 
 # sudo apt-get -y install python-dev libffi-dev libssl-dev
 # sudo apt-get -y -f install
@@ -42,7 +58,9 @@ function installSqlite()
 
 function updateOpenSSL()
 {
-    lastOpenSSL="1.0.2"
+    export PATH=${dependences}/bin/:$PATH
+    export LD_LIBRARY_PATH="$HOME/.virtual-python/dependences/lib"
+    lastOpenSSL="1.1.0"
     nowOpenSSL=`openssl version|cut -c 9-13`
 
     if [ "${lastOpenSSL}" = "${nowOpenSSL}" ]
@@ -57,21 +75,21 @@ function updateOpenSSL()
         else
             echo -e "${blue}${nowOpenSSL} is too old, should update to lastOpenSSL...${off_color}"
 
-            if [ -f "openssl-1.0.2h.tar.gz" ]
+            if [ -f "openssl-1.1.0e.tar.gz" ]
             then
-                rm -rf "openssl-1.0.2h.tar.gz"
+                rm -rf "openssl-1.1.0e.tar.gz"
             fi
 
-            wget "http://mirror.switch.ch/ftp/mirror/openssl/source/openssl-1.0.2h.tar.gz" --no-check-certificate
+            wget "https://ftp.openssl.org/source/old/1.1.0/openssl-1.1.0e.tar.gz" --no-check-certificate
 
-            tar -zxf "openssl-1.0.2h.tar.gz"
-            cd "openssl-1.0.2h"
+            tar -zxf "openssl-1.1.0e.tar.gz"
+            cd "openssl-1.1.0e"
             ./config --prefix=${dependences} shared zlib-dynamic
             make
             make install
 
             cd ../
-            rm -rf "openssl-1.0.2h*"
+            rm -rf "openssl-1.1.0e*"
         fi
     fi
 }
@@ -82,14 +100,17 @@ updateOpenSSL
 
 # python
 
-arg="$1"
+pyversion="$1"
+pyname="$2"
 
-
-if [ "${arg}X" = "X" ]
+if [ "${pyversion}X" = "X" ]
 then
     pyversion="2.7.9"
-else
-    pyversion=${arg}
+fi
+
+if [ "${pyname}X" = "X" ]
+then
+    pyname="common"
 fi
 
 
@@ -121,7 +142,9 @@ function installPython()
 
         echo -e "${blue_yellow}./configure ...${off_color}"
         # ./configure "--prefix=${pyhome}" --enable-ipv6 
-        LDFLAGS="-lcrypto -lssl -Wl,-rpath=$HOME/.virtual-python/dependences/lib" CPPFLAGS="-I/home/scrapyer/.virtual-python/dependences/include"  ./configure --prefix=${pyhome}
+        # LDFLAGS="-lcrypto -lssl -Wl,-rpath=$HOME/.virtual-python/dependences/lib" CPPFLAGS="-I$HOME/.virtual-python/dependences/include" ./configure --prefix=${pyhome} --enable-loadable-sqlite-extensions
+        export LD_LIBRARY_PATH="$HOME/.virtual-python/dependences/lib"
+        ./configure --prefix=${pyhome} --enable-loadable-sqlite-extensions --with-zlib
 
         echo -e "${blue_yellow}make source ...${off_color}"
         make
@@ -181,7 +204,7 @@ fi
 
 
 
-env="virtual-env"
+env=${pyname}
 
 virtual="${pyhome}/bin/virtualenv"
 
@@ -219,16 +242,15 @@ function mustHasV()
         echo -e "${blue}Has tool ${virtual} ${off_color}"
     else
         echo -e "${blue_yellow}No virtualenv module, will download it ...${off_color}"
-        local env_url="https://pypi.python.org/packages/5c/79/5dae7494b9f5ed061cff9a8ab8d6e1f02db352f3facf907d9eb614fb80e9/virtualenv-15.0.2.tar.gz#md5=0ed59863994daf1292827ffdbba80a63"
-        wget ${env_url} --no-check-certificate
-        tar -zxf "virtualenv-15.0.2.tar.gz"
-        cd "virtualenv-15.0.2"
+        wget "http://pypi.doubanio.com/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz#md5=44e19f4134906fe2d75124427dc9b716" -O virtualenv-15.1.0.tar.gz --no-check-certificate
+        tar -zxf "virtualenv-15.1.0.tar.gz"
+        cd "virtualenv-15.1.0"
 
         linkPython
 
         ${pyhome}/bin/python setup.py install
         cd ../
-        rm -rf virtualenv-15.0.2 virtualenv-15.0.2.tar.gz
+        rm -rf virtualenv-15.1.0 virtualenv-15.1.0.tar.gz
 
         if [ -f ${virtual} ]
         then
@@ -269,59 +291,17 @@ then
 
     ver=`python -c "import sys;print(sys.version)"|awk '{printf $0}'|cut -c -5`
 
-    if [ "${pyversion}" = "${ver}" ]
+    if [ "${pyversion}" != "${ver}" ]
     then
-        installRequirements
-    else
         echo -e "${blue_yellow}Python version ${ver} in ${env} not same as set Python ${pyversion}...  ${off_color}"
         echo -e "${blue_yellow}Del ${env} ...  ${off_color}"
         rm -rf ${env}
         # deactivate
-        /bin/bash "$0" "${pyversion}"
+        /bin/bash "$*"
     fi
-
-
-
-elif [ -f "${env}.tar.gz" ]
-then
-    echo -e "${blue_yellow}No env but has ${env}.tar.gz, will extract it${off_color}"
-    tar -zxf "${env}.tar.gz"
-    echo -e "${blue}Extract finished!${off_color}"
-    
-    
-    source ${env}/bin/activate
-
-    ver=`python -c "import sys;print(sys.version)"|awk '{printf $0}'|cut -c -5`
-
-
-    if [ "${pyversion}" = "${ver}" ]
-    then
-        installRequirements
-    else
-        echo -e "${blue_yellow}Python version ${ver} in ${env} not same as set Python ${pyversion}...  ${off_color}"
-        echo -e "${blue_yellow}Del ${env} ...  ${off_color}"
-        rm -rf ${env}
-        # deactivate
-        /bin/bash "$0" "${pyversion}"
-    fi
-
-
 else
-    echo -e "${blue_yellow}no ${env} and no ${env}.tar.gz ...${off_color}"
-
-    ${virtual} -p ${pyhome}/bin/python ${env} --no-site-packages
-    if [ -f ${rfile} ]
-    then
-
-        echo -e "${blue_yellow}Find ${rfile} will use pip to install it ...  ${off_color}"
-        source ${env}/bin/activate
-        installRequirements
-
-        
-    else
-        echo -e "${red_warning}No ${env} and No ${env}.tar.gz,  will exit${off_color}"
-        exit 0
-    fi
+    ${virtual} -p ${pyhome}/bin/python ${env}
 fi
 
+source $WORK_DIR/$pyname/bin/activate
 python -V
